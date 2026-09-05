@@ -99,6 +99,8 @@ from irace import irace, ParameterSpace, Scenario, Experiment, Real, Integer, Bo
 import rpy2.robjects as robjects
 
 from problem.n_variables.ackley import Ackley
+from problem.n_variables.CEC import ShiftedRotatedRastrigin
+from experiment.problem_identity import create_seeded_problem
 
 os.environ["LANG"] = "en_US.UTF-8"
 os.environ["LC_ALL"] = "en_US.UTF-8"
@@ -124,10 +126,17 @@ max_evaluations = 250_000
 num_runs = 3  # Number of independent runs per problem
 budget = 1000  # irace experiments (config-instance evaluations) per parameter
 
+# Tuning instances. The first three are unrotated/(near-)separable classics;
+# the seeded rotated Rastrigin adds a fully coupled non-separable landscape so
+# racing also judges configurations on variable interactions. NONE of these may
+# appear in the evaluation suite (no tuning/test leakage) - in particular,
+# ShiftedRotatedRastrigin must stay out of the final suite roster.
+TUNING_INSTANCE_SEED = 1042  # deliberately distinct from BENCHMARK_BASE_SEED
 problems = [
     Sphere(number_of_variables),
     Rastrigin(number_of_variables),
     Ackley(number_of_variables),
+    create_seeded_problem(ShiftedRotatedRastrigin, number_of_variables, TUNING_INSTANCE_SEED),
 ]
 
 
